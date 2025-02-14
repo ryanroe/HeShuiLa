@@ -1,28 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using System.Windows.Media.Animation;
+using System.Threading.Tasks;
 using Forms = System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace HeShuiLa
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class MainWindow : Window
     {
+        private const int REMIDER_INTERVAL = 30 * 60 * 1000; // 0.5 hour
+        private const int REMIDER_DURATION = 60 * 1000; // 1 minute
         private DispatcherTimer reminderTimer;
         private Forms.NotifyIcon notifyIcon;
         private bool isShowing = false;
@@ -34,16 +22,15 @@ namespace HeShuiLa
             InitializeTimer();
             InitializeNotifyIcon();
             this.Opacity = 0;
+            this.Hide();
             this.ShowInTaskbar = false;
-            
-            // Only prevent closing if not exiting through tray icon
-            this.Closing += (s, e) => e.Cancel = !isExiting;
+
         }
 
         private void InitializeTimer()
         {
             reminderTimer = new DispatcherTimer();
-            reminderTimer.Interval = TimeSpan.FromSeconds(60); 
+            reminderTimer.Interval = TimeSpan.FromSeconds(REMIDER_INTERVAL);
             reminderTimer.Tick += ReminderTimer_Tick;
             reminderTimer.Start();
         }
@@ -53,12 +40,11 @@ namespace HeShuiLa
             notifyIcon = new Forms.NotifyIcon();
             notifyIcon.Icon = new System.Drawing.Icon(System.Drawing.SystemIcons.Information, 40, 40);
             notifyIcon.Visible = true;
-            notifyIcon.Text = "Water Reminder";
+            notifyIcon.Text = "喝水啦";
 
-            // Create context menu
             var contextMenu = new Forms.ContextMenuStrip();
-            var exitItem = new Forms.ToolStripMenuItem("Exit");
-            exitItem.Click += (s, e) => 
+            var exitItem = new Forms.ToolStripMenuItem("退出");
+            exitItem.Click += (s, e) =>
             {
                 isExiting = true;
                 Application.Current.Shutdown();
@@ -80,81 +66,27 @@ namespace HeShuiLa
                 isShowing = true;
                 this.Show();
                 this.Activate();
-                this.Topmost = true; // Make sure window stays on top
+                this.Topmost = true;
 
-                var storyboard = new Storyboard();
-
-                // Opacity animation
-                var fadeIn = new DoubleAnimation
+                var showStoryboard = (Storyboard)FindResource("ShowAnimation");
+                showStoryboard.Completed += async (s, e) =>
                 {
-                    From = 0.0,
-                    To = 1.0,
-                    Duration = TimeSpan.FromSeconds(1)
+                    await Task.Delay(REMIDER_DURATION);
+                    Dispatcher.Invoke(HideWithAnimation);
                 };
-                Storyboard.SetTarget(fadeIn, this);
-                Storyboard.SetTargetProperty(fadeIn, new PropertyPath(OpacityProperty));
-
-                // Background color animation
-                var colorAnimation = new ColorAnimation
-                {
-                    From = Colors.Transparent,
-                    To = Color.FromArgb(204, 0, 0, 0), // #CC000000
-                    Duration = TimeSpan.FromSeconds(1)
-                };
-                
-                this.Background = new SolidColorBrush(Color.FromArgb(204, 0, 0, 0));
-                Storyboard.SetTarget(colorAnimation, this.Background);
-                Storyboard.SetTargetProperty(colorAnimation, new PropertyPath(SolidColorBrush.ColorProperty));
-
-                storyboard.Children.Add(fadeIn);
-                storyboard.Children.Add(colorAnimation);
-
-                storyboard.Completed += (s, e) =>
-                {
-                    Task.Delay(30000).ContinueWith(_ =>
-                    {
-                        Dispatcher.Invoke(HideWithAnimation);
-                    });
-                };
-
-                storyboard.Begin();
+                showStoryboard.Begin(this);
             }
         }
 
         private void HideWithAnimation()
         {
-            var storyboard = new Storyboard();
-
-            // Opacity animation
-            var fadeOut = new DoubleAnimation
-            {
-                From = 1.0,
-                To = 0.0,
-                Duration = TimeSpan.FromSeconds(1)
-            };
-            Storyboard.SetTarget(fadeOut, this);
-            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(OpacityProperty));
-
-            // Background color animation
-            var colorAnimation = new ColorAnimation
-            {
-                From = (this.Background as SolidColorBrush)?.Color,
-                To = Colors.Transparent,
-                Duration = TimeSpan.FromSeconds(1)
-            };
-            Storyboard.SetTarget(colorAnimation, this.Background);
-            Storyboard.SetTargetProperty(colorAnimation, new PropertyPath(SolidColorBrush.ColorProperty));
-
-            storyboard.Children.Add(fadeOut);
-            storyboard.Children.Add(colorAnimation);
-
-            storyboard.Completed += (s, e) =>
+            var hideStoryboard = (Storyboard)FindResource("HideAnimation");
+            hideStoryboard.Completed += (s, e) =>
             {
                 this.Hide();
                 isShowing = false;
             };
-
-            storyboard.Begin();
+            hideStoryboard.Begin(this);
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -163,6 +95,10 @@ namespace HeShuiLa
             {
                 notifyIcon.Dispose();
                 base.OnClosing(e);
+            }
+            else
+            {
+                e.Cancel = true;
             }
         }
     }

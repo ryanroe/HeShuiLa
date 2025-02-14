@@ -13,9 +13,29 @@
     WindowState="Maximized"
     WindowStyle="None"
     mc:Ignorable="d">
+    <Window.Resources>
+        <Storyboard x:Key="ShowAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:1" />
+        </Storyboard>
+        <Storyboard x:Key="HideAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="1"
+                To="0"
+                Duration="0:0:1" />
+
+        </Storyboard>
+    </Window.Resources>
     <Window.DataContext>
         <local:MainVM />
     </Window.DataContext>
+    <Window.Background>
+        <SolidColorBrush Color="#CC000000" />
+    </Window.Background>
     <Grid>
         <TextBlock
             HorizontalAlignment="Center"
