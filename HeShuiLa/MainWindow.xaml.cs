@@ -9,9 +9,10 @@ namespace HeShuiLa
 {
     public partial class MainWindow : Window
     {
-        private const int REMIDER_INTERVAL = 30 * 60 * 1000; // 0.5 hour
+        private const int REMIDER_INTERVAL = 30 * 60 * 1000; // 30 minutes
         private const int REMIDER_DURATION = 60 * 1000; // 1 minute
-        private DispatcherTimer reminderTimer;
+        private DispatcherTimer countdownTimer;
+        private DateTime nextReminderTime;
         private Forms.NotifyIcon notifyIcon;
         private bool isShowing = false;
         private bool isExiting = false;
@@ -29,10 +30,41 @@ namespace HeShuiLa
 
         private void InitializeTimer()
         {
-            reminderTimer = new DispatcherTimer();
-            reminderTimer.Interval = TimeSpan.FromSeconds(REMIDER_INTERVAL);
-            reminderTimer.Tick += ReminderTimer_Tick;
-            reminderTimer.Start();
+            countdownTimer = new DispatcherTimer();
+            countdownTimer.Interval = TimeSpan.FromSeconds(1);
+            countdownTimer.Tick += CountdownTimer_Tick;
+            
+            ScheduleNextReminder();
+            countdownTimer.Start();
+        }
+
+        private void ScheduleNextReminder()
+        {
+            nextReminderTime = DateTime.Now.AddMilliseconds(REMIDER_INTERVAL);
+            UpdateTrayIconText();
+        }
+
+        private void CountdownTimer_Tick(object sender, EventArgs e)
+        {
+            UpdateTrayIconText();
+            if (DateTime.Now >= nextReminderTime)
+            {
+                ShowWithAnimation();
+            }
+        }
+
+        private void UpdateTrayIconText()
+        {
+            if (notifyIcon != null)
+            {
+                var timeRemaining = nextReminderTime - DateTime.Now;
+                if (timeRemaining.TotalSeconds > 0)
+                {
+                    int minutes = (int)timeRemaining.TotalMinutes;
+                    int seconds = (int)timeRemaining.TotalSeconds % 60;
+                    notifyIcon.Text = $"喝水啦 - {minutes:00}:{seconds:00}";
+                }
+            }
         }
 
         private void InitializeNotifyIcon()
@@ -54,20 +86,15 @@ namespace HeShuiLa
             notifyIcon.ContextMenuStrip = contextMenu;
         }
 
-        private void ReminderTimer_Tick(object sender, EventArgs e)
-        {
-            ShowWithAnimation();
-        }
-
         private void ShowWithAnimation()
         {
             if (!isShowing)
             {
                 isShowing = true;
+                countdownTimer.Stop();
                 this.Show();
                 this.Activate();
                 this.Topmost = true;
-
                 var showStoryboard = (Storyboard)FindResource("ShowAnimation");
                 showStoryboard.Completed += async (s, e) =>
                 {
@@ -85,6 +112,8 @@ namespace HeShuiLa
             {
                 this.Hide();
                 isShowing = false;
+                ScheduleNextReminder();
+                countdownTimer.Start();
             };
             hideStoryboard.Begin(this);
         }
