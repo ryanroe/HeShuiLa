@@ -23,7 +23,11 @@ namespace HeShuiLa
         }
 
         private readonly List<string> hints = new List<string>();
-        private readonly string hintsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "hints.txt");
+        private readonly string appDataPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "HeShuiLa");
+        private readonly string hintsPath;
+        private readonly string settingsPath;
         private readonly Random random = new Random();
 
         private string hintText = "Please drink water";
@@ -32,9 +36,49 @@ namespace HeShuiLa
         private bool shouldUpdateHintText = true;
         public bool ShouldUpdateHintText { get => shouldUpdateHintText; set => SetProperty(ref shouldUpdateHintText, value, nameof(ShouldUpdateHintText)); }
 
+        private int reminderInterval = 30 * 60 * 1000; // 30 minutes
+        public int ReminderInterval
+        {
+            get => reminderInterval;
+            set => SetProperty(ref reminderInterval, value, nameof(ReminderInterval));
+        }
+
+        private int reminderDuration = 30 * 1000; // 30 seconds
+        public int ReminderDuration
+        {
+            get => reminderDuration;
+            set => SetProperty(ref reminderDuration, value, nameof(ReminderDuration));
+        }
+
+        public int ReminderIntervalMinutes
+        {
+            get => ReminderInterval / (60 * 1000);
+            set => ReminderInterval = value * 60 * 1000;
+        }
+
+        public int ReminderDurationSeconds
+        {
+            get => ReminderDuration / 1000;
+            set => ReminderDuration = value * 1000;
+        }
+
+        public event EventHandler SettingsChanged;
+
         private AppService()
         {
+            hintsPath = Path.Combine(appDataPath, "hints.txt");
+            settingsPath = Path.Combine(appDataPath, "settings.txt");
+            EnsureAppDataDirectoryExists();
             LoadHints();
+            LoadSettings();
+        }
+
+        private void EnsureAppDataDirectoryExists()
+        {
+            if (!Directory.Exists(appDataPath))
+            {
+                Directory.CreateDirectory(appDataPath);
+            }
         }
 
         private void LoadHints()
@@ -54,6 +98,32 @@ namespace HeShuiLa
         private void SaveHints()
         {
             File.WriteAllLines(hintsPath, hints);
+        }
+
+        public void SaveSettings()
+        {
+            var settings = new[]
+            {
+                ShouldUpdateHintText.ToString(),
+                ReminderInterval.ToString(),
+                ReminderDuration.ToString()
+            };
+            File.WriteAllLines(settingsPath, settings);
+            SettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void LoadSettings()
+        {
+            if (File.Exists(settingsPath))
+            {
+                var settings = File.ReadAllLines(settingsPath);
+                if (settings.Length >= 3)
+                {
+                    ShouldUpdateHintText = bool.Parse(settings[0]);
+                    ReminderInterval = int.Parse(settings[1]);
+                    ReminderDuration = int.Parse(settings[2]);
+                }
+            }
         }
 
         public async Task UpdateHintText()

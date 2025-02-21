@@ -9,14 +9,13 @@ namespace HeShuiLa
 {
     public partial class MainWindow : Window
     {
-        private const int REMIDER_INTERVAL = 30 * 60 * 1000; // 30 minutes
-        private const int REMIDER_DURATION = 30 * 1000; // 1 minute
         private DispatcherTimer countdownTimer;
         private DateTime nextReminderTime;
         private Forms.NotifyIcon notifyIcon;
         private bool isShowing = false;
         private bool isExiting = false;
         private MainVM vm;
+        private readonly SettingsWindow settingsWindow = new SettingsWindow();
 
         public MainWindow()
         {
@@ -27,6 +26,8 @@ namespace HeShuiLa
             this.Opacity = 0;
             this.Hide();
             this.ShowInTaskbar = false;
+            settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            vm.App.SettingsChanged += App_SettingsChanged;
         }
 
         private void InitializeTimer()
@@ -41,7 +42,7 @@ namespace HeShuiLa
 
         private void ScheduleNextReminder()
         {
-            nextReminderTime = DateTime.Now.AddMilliseconds(REMIDER_INTERVAL);
+            nextReminderTime = DateTime.Now.AddMilliseconds(vm.App.ReminderInterval);
             UpdateTrayIconText();
         }
 
@@ -74,8 +75,13 @@ namespace HeShuiLa
             notifyIcon.Icon = new System.Drawing.Icon(System.Drawing.SystemIcons.Information, 40, 40);
             notifyIcon.Visible = true;
             notifyIcon.Text = "喝水啦";
+            notifyIcon.DoubleClick += (s, e) => OpenSettings();
 
             var contextMenu = new Forms.ContextMenuStrip();
+
+            var settingsItem = new Forms.ToolStripMenuItem("设置");
+            settingsItem.Click += (s, e) => OpenSettings();
+            contextMenu.Items.Add(settingsItem);
 
             var updateHintItem = new Forms.ToolStripMenuItem("更新提示语");
             updateHintItem.CheckOnClick = true;
@@ -109,7 +115,7 @@ namespace HeShuiLa
                 var showStoryboard = (Storyboard)FindResource("ShowAnimation");
                 showStoryboard.Completed += async (s, e) =>
                 {
-                    await Task.Delay(REMIDER_DURATION);
+                    await Task.Delay(vm.App.ReminderDuration);
                     Dispatcher.Invoke(HideWithAnimation);
                 };
                 showStoryboard.Begin(this);
@@ -133,10 +139,27 @@ namespace HeShuiLa
             hideStoryboard.Begin(this);
         }
 
+        private void OpenSettings()
+        {
+            if (!settingsWindow.IsVisible)
+                settingsWindow.ShowDialog();
+        }
+
+        private void App_SettingsChanged(object sender, EventArgs e)
+        {
+            if (!isShowing)
+            {
+                countdownTimer.Stop();
+                ScheduleNextReminder();
+                countdownTimer.Start();
+            }
+        }
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             if (isExiting)
             {
+                vm.App.SettingsChanged -= App_SettingsChanged;
                 notifyIcon.Dispose();
                 base.OnClosing(e);
             }
