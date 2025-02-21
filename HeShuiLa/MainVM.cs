@@ -17,5 +17,12 @@ namespace HeShuiLa
         {
             await App.UpdateHintText();
         }
+
+        public event Action ShowReminderRequested;
+        
+        public void ShowReminder()
+        {
+            ShowReminderRequested?.Invoke();
+        }
     }
 }

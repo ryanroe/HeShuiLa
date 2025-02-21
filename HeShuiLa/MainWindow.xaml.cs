@@ -28,6 +28,7 @@ namespace HeShuiLa
             this.ShowInTaskbar = false;
             settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             vm.App.SettingsChanged += App_SettingsChanged;
+            vm.ShowReminderRequested += () => ShowWithAnimation(5000); // 5 seconds for test
         }
 
         private void InitializeTimer()
@@ -51,7 +52,7 @@ namespace HeShuiLa
             UpdateTrayIconText();
             if (DateTime.Now >= nextReminderTime)
             {
-                ShowWithAnimation();
+                ShowWithAnimation(null); // Use configured duration for regular reminders
             }
         }
 
@@ -83,14 +84,6 @@ namespace HeShuiLa
             settingsItem.Click += (s, e) => OpenSettings();
             contextMenu.Items.Add(settingsItem);
 
-            var updateHintItem = new Forms.ToolStripMenuItem("更新提示语");
-            updateHintItem.CheckOnClick = true;
-            updateHintItem.Checked = vm.App.ShouldUpdateHintText;
-            updateHintItem.Click += (s, e) =>
-            {
-                vm.App.ShouldUpdateHintText = updateHintItem.Checked;
-            };
-            contextMenu.Items.Add(updateHintItem);
 
             var exitItem = new Forms.ToolStripMenuItem("退出");
             exitItem.Click += (s, e) =>
@@ -103,7 +96,7 @@ namespace HeShuiLa
             notifyIcon.ContextMenuStrip = contextMenu;
         }
 
-        private void ShowWithAnimation()
+        private void ShowWithAnimation(int? customDuration = null)
         {
             if (!isShowing)
             {
@@ -115,7 +108,7 @@ namespace HeShuiLa
                 var showStoryboard = (Storyboard)FindResource("ShowAnimation");
                 showStoryboard.Completed += async (s, e) =>
                 {
-                    await Task.Delay(vm.App.ReminderDuration);
+                    await Task.Delay(customDuration ?? vm.App.ReminderDuration);
                     Dispatcher.Invoke(HideWithAnimation);
                 };
                 showStoryboard.Begin(this);

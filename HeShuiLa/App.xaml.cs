@@ -13,5 +13,6 @@ namespace HeShuiLa
     /// </summary>
     public partial class App : Application
     {
+        public MainVM MainVM { get; } = new MainVM();
     }
 }

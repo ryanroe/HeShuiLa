@@ -31,7 +31,7 @@
         </Storyboard>
     </Window.Resources>
     <Window.DataContext>
-        <local:MainVM />
+        <Binding Path="MainVM" Source="{x:Static Application.Current}" />
     </Window.DataContext>
     <Window.Background>
         <SolidColorBrush Color="#CC000000" />
