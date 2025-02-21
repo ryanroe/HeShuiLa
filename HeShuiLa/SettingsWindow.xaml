@@ -14,6 +14,21 @@
     </Window.DataContext>
     <StackPanel Margin="20">
         <CheckBox Content="自动更新提示语" IsChecked="{Binding App.ShouldUpdateHintText}" />
+        
+        <GroupBox Margin="0,20,0,0" Header="提示语设置">
+            <StackPanel Margin="10">
+                <TextBox
+                    Height="100"
+                    AcceptsReturn="True"
+                    TextWrapping="Wrap"
+                    Text="{Binding HintsText}"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                <TextBlock 
+                    Margin="0,5,0,0"
+                    Text="每行一条提示语"
+                    Foreground="Gray"/>
+            </StackPanel>
+        </GroupBox>
 
         <GroupBox Margin="0,20,0,0" Header="提醒设置">
             <StackPanel Margin="10">

@@ -16,8 +16,16 @@ namespace HeShuiLa
         public ICommand SaveCommand { get; }
         public ICommand TestCommand { get; }
 
+        private string hintsText;
+        public string HintsText
+        {
+            get => hintsText;
+            set => SetProperty(ref hintsText, value, nameof(HintsText));
+        }
+
         private void Save()
         {
+            App.UpdateHints(HintsText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
             App.SaveSettings();
             MessageBox.Show("保存成功");
             Application.Current.Windows.OfType<SettingsWindow>().FirstOrDefault()?.Hide();
@@ -28,6 +36,7 @@ namespace HeShuiLa
             MainVM = ((App)Application.Current).MainVM;
             SaveCommand = new DelegateCommand(s => Save(), s => true);
             TestCommand = new DelegateCommand(s => MainVM.ShowReminder(), s => true);
+            HintsText = string.Join(Environment.NewLine, App.GetHints());
         }
 
     }

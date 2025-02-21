@@ -86,9 +86,9 @@ namespace HeShuiLa
             if (File.Exists(hintsPath))
             {
                 hints.Clear();
-                hints.AddRange(File.ReadAllLines(hintsPath));
+                hints.AddRange(File.ReadAllLines(hintsPath).Where(h => !string.IsNullOrWhiteSpace(h)));
             }
-            else
+            if (!hints.Any())
             {
                 hints.Add("Please drink water");
                 SaveHints();
@@ -133,6 +133,18 @@ namespace HeShuiLa
                 int index = random.Next(hints.Count);
                 HintText = hints[index];
             }
+        }
+
+        public IEnumerable<string> GetHints()
+        {
+            return hints.ToList();
+        }
+
+        public void UpdateHints(string[] newHints)
+        {
+            hints.Clear();
+            hints.AddRange(newHints);
+            SaveHints();
         }
     }
 }
