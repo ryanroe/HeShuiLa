@@ -17,17 +17,16 @@ namespace HeShuiLa
         private bool isShowing = false;
         private bool isExiting = false;
         private MainVM vm;
-        private bool updateHintText = true; // Add this line
 
         public MainWindow()
         {
             InitializeComponent();
+            this.vm = this.DataContext as MainVM;
             InitializeTimer();
             InitializeNotifyIcon();
             this.Opacity = 0;
             this.Hide();
             this.ShowInTaskbar = false;
-            this.vm = this.DataContext as MainVM;
         }
 
         private void InitializeTimer()
@@ -80,10 +79,10 @@ namespace HeShuiLa
 
             var updateHintItem = new Forms.ToolStripMenuItem("更新提示语");
             updateHintItem.CheckOnClick = true;
-            updateHintItem.Checked = updateHintText;
+            updateHintItem.Checked = vm.App.ShouldUpdateHintText;
             updateHintItem.Click += (s, e) =>
             {
-                updateHintText = updateHintItem.Checked;
+                vm.App.ShouldUpdateHintText = updateHintItem.Checked;
             };
             contextMenu.Items.Add(updateHintItem);
 
@@ -126,7 +125,7 @@ namespace HeShuiLa
                 isShowing = false;
                 ScheduleNextReminder();
                 countdownTimer.Start();
-                if (updateHintText)
+                if (vm.App.ShouldUpdateHintText)
                 {
                     await vm.UpdateHintText();
                 }

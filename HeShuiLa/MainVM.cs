@@ -12,45 +12,10 @@ namespace HeShuiLa
 {
     public class MainVM : ObservableObject
     {
-        private readonly List<string> hints = new List<string>();
-        private readonly string hintsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "hints.txt");
-        private readonly Random random = new Random();
-
-        private string hintText = "Please drink water";
-        public string HintText { get => hintText; set => SetProperty(ref hintText, value, nameof(HintText)); }
-        private readonly DouBaoAI doubao = new DouBaoAI();
-
-        public MainVM()
-        {
-            LoadHints();
-        }
-
-        private void LoadHints()
-        {
-            if (File.Exists(hintsPath))
-            {
-                hints.Clear();
-                hints.AddRange(File.ReadAllLines(hintsPath));
-            }
-            else
-            {
-                hints.Add("Please drink water");
-                SaveHints();
-            }
-        }
-
-        private void SaveHints()
-        {
-            File.WriteAllLines(hintsPath, hints);
-        }
-
+        public AppService App { get; } = AppService.Instance;
         public async Task UpdateHintText()
         {
-            if (hints.Count > 0)
-            {
-                int index = random.Next(hints.Count);
-                HintText = hints[index];
-            }
+            await App.UpdateHintText();
         }
     }
 }

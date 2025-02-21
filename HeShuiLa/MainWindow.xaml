@@ -43,6 +43,6 @@
             FontSize="48"
             FontWeight="Bold"
             Foreground="White"
-            Text="{Binding HintText}" />
+            Text="{Binding App.HintText}" />
     </Grid>
 </Window>
