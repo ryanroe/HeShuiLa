@@ -12,57 +12,68 @@
     <Window.DataContext>
         <local:SettingsVM />
     </Window.DataContext>
-    <StackPanel Margin="20">
-        <CheckBox Content="自动更新提示语" IsChecked="{Binding App.ShouldUpdateHintText}" />
-        
-        <GroupBox Margin="0,20,0,0" Header="提示语设置">
-            <StackPanel Margin="10">
-                <TextBox
-                    Height="100"
-                    AcceptsReturn="True"
-                    TextWrapping="Wrap"
-                    Text="{Binding HintsText}"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                <TextBlock 
-                    Margin="0,5,0,0"
-                    Text="每行一条提示语"
-                    Foreground="Gray"/>
-            </StackPanel>
-        </GroupBox>
+    <Grid>
+        <TextBlock
+            Margin="0,5,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top">
+            <Hyperlink NavigateUri="https://github.com/ryanroe/HeShuiLa" RequestNavigate="Hyperlink_RequestNavigate">
+                【喝水啦】项目地址
+            </Hyperlink>
+        </TextBlock>
 
-        <GroupBox Margin="0,20,0,0" Header="提醒设置">
-            <StackPanel Margin="10">
-                <DockPanel Margin="0,5">
-                    <TextBlock VerticalAlignment="Center" Text="提醒间隔 (分钟)：" />
+        <StackPanel Margin="20">
+            <CheckBox Content="自动更新提示语" IsChecked="{Binding App.ShouldUpdateHintText}" />
+
+            <GroupBox Margin="0,20,0,0" Header="提示语设置">
+                <StackPanel Margin="10">
                     <TextBox
-                        Width="100"
-                        HorizontalAlignment="Left"
-                        Text="{Binding App.ReminderIntervalMinutes}" />
-                </DockPanel>
+                        Height="100"
+                        AcceptsReturn="True"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        Text="{Binding HintsText}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        Foreground="Gray"
+                        Text="每行一条提示语" />
+                </StackPanel>
+            </GroupBox>
 
-                <DockPanel Margin="0,5">
-                    <TextBlock VerticalAlignment="Center" Text="提醒持续时间 (秒)：" />
-                    <TextBox
-                        Width="100"
-                        HorizontalAlignment="Left"
-                        Text="{Binding App.ReminderDurationSeconds}" />
-                </DockPanel>
-            </StackPanel>
-        </GroupBox>
+            <GroupBox Margin="0,20,0,0" Header="提醒设置">
+                <StackPanel Margin="10">
+                    <DockPanel Margin="0,5">
+                        <TextBlock VerticalAlignment="Center" Text="提醒间隔 (分钟)：" />
+                        <TextBox
+                            Width="100"
+                            HorizontalAlignment="Left"
+                            Text="{Binding App.ReminderIntervalMinutes}" />
+                    </DockPanel>
 
-        <DockPanel Margin="0,20,0,0">
-            <Button 
-                Content="测试提醒" 
-                Command="{Binding TestCommand}"
-                Width="100" 
-                HorizontalAlignment="Left" 
-                Padding="5"/>
-            <Button 
-                Content="保存" 
-                Command="{Binding SaveCommand}"
-                Width="100" 
-                HorizontalAlignment="Right" 
-                Padding="5"/>
-        </DockPanel>
-    </StackPanel>
+                    <DockPanel Margin="0,5">
+                        <TextBlock VerticalAlignment="Center" Text="提醒持续时间 (秒)：" />
+                        <TextBox
+                            Width="100"
+                            HorizontalAlignment="Left"
+                            Text="{Binding App.ReminderDurationSeconds}" />
+                    </DockPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <DockPanel Margin="0,20,0,0">
+                <Button
+                    Width="100"
+                    Padding="5"
+                    HorizontalAlignment="Left"
+                    Command="{Binding TestCommand}"
+                    Content="测试提醒" />
+                <Button
+                    Width="100"
+                    Padding="5"
+                    HorizontalAlignment="Right"
+                    Command="{Binding SaveCommand}"
+                    Content="保存" />
+            </DockPanel>
+        </StackPanel>
+    </Grid>
 </Window>
