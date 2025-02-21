@@ -10,12 +10,14 @@ namespace HeShuiLa
     public partial class MainWindow : Window
     {
         private const int REMIDER_INTERVAL = 30 * 60 * 1000; // 30 minutes
-        private const int REMIDER_DURATION = 60 * 1000; // 1 minute
+        private const int REMIDER_DURATION = 30 * 1000; // 1 minute
         private DispatcherTimer countdownTimer;
         private DateTime nextReminderTime;
         private Forms.NotifyIcon notifyIcon;
         private bool isShowing = false;
         private bool isExiting = false;
+        private MainVM vm;
+        private bool updateHintText = true; // Add this line
 
         public MainWindow()
         {
@@ -25,7 +27,7 @@ namespace HeShuiLa
             this.Opacity = 0;
             this.Hide();
             this.ShowInTaskbar = false;
-
+            this.vm = this.DataContext as MainVM;
         }
 
         private void InitializeTimer()
@@ -33,7 +35,7 @@ namespace HeShuiLa
             countdownTimer = new DispatcherTimer();
             countdownTimer.Interval = TimeSpan.FromSeconds(1);
             countdownTimer.Tick += CountdownTimer_Tick;
-            
+
             ScheduleNextReminder();
             countdownTimer.Start();
         }
@@ -75,6 +77,16 @@ namespace HeShuiLa
             notifyIcon.Text = "喝水啦";
 
             var contextMenu = new Forms.ContextMenuStrip();
+
+            var updateHintItem = new Forms.ToolStripMenuItem("更新提示语");
+            updateHintItem.CheckOnClick = true;
+            updateHintItem.Checked = updateHintText;
+            updateHintItem.Click += (s, e) =>
+            {
+                updateHintText = updateHintItem.Checked;
+            };
+            contextMenu.Items.Add(updateHintItem);
+
             var exitItem = new Forms.ToolStripMenuItem("退出");
             exitItem.Click += (s, e) =>
             {
@@ -108,12 +120,16 @@ namespace HeShuiLa
         private void HideWithAnimation()
         {
             var hideStoryboard = (Storyboard)FindResource("HideAnimation");
-            hideStoryboard.Completed += (s, e) =>
+            hideStoryboard.Completed += async (s, e) =>
             {
                 this.Hide();
                 isShowing = false;
                 ScheduleNextReminder();
                 countdownTimer.Start();
+                if (updateHintText)
+                {
+                    await vm.UpdateHintText();
+                }
             };
             hideStoryboard.Begin(this);
         }
