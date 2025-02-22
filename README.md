@@ -1,34 +1,39 @@
-# HeShuiLa (喝水啦)
+# HeShuiLa (喝水啦) - Water Reminder
 
 A simple Windows application that reminds you to drink water regularly.
 
 ## Features
 
-- Runs in system tray
-- Shows full-screen reminder every 30 minutes
-- Reminder stays visible for 1 minute
-- Smooth fade in/out animations
-- Minimal and non-intrusive design
+- Customizable reminder intervals
+- Personalized reminder messages
+- System tray integration
+- Fade in/out notifications
+- Persistent settings
+- Single instance application
 
 ## Usage
 
-1. Run the application
-2. The app will minimize to system tray
-3. Every 30 minutes, a full-screen reminder will appear
-4. To exit, right-click the system tray icon and select Exit
+1. Run the application - it will minimize to system tray
+2. Double click the tray icon or right-click and select "设置" to open settings
+3. In settings you can:
+   - Set reminder interval (in minutes)
+   - Set reminder duration (in seconds)
+   - Customize reminder messages
+   - Test the reminder
 
-## Requirements
+## System Requirements
 
 - Windows OS
-- .NET Framework 4.6 or higher
+- .NET Framework 4.7.2 or higher
 
-## Development
+## Configuration
 
-Built with:
+The application stores its settings and custom messages in:
+`%AppData%\HeShuiLa\`
 
-- WPF (Windows Presentation Foundation)
-- C# .NET Framework 4.6
-- MVVM architecture
+## Build
+
+Open the solution in Visual Studio and build the project. The application requires WPF and Windows Forms references.
 
 ## License
 
