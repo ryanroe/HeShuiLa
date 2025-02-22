@@ -59,7 +59,18 @@ namespace HeShuiLa
         public int ReminderDurationSeconds
         {
             get => ReminderDuration / 1000;
-            set => ReminderDuration = value * 1000;
+            set
+            {
+                if (value < 5)
+                {
+                    value = 5;
+                }
+                if (value > ReminderIntervalMinutes * 60)
+                {
+                    value = ReminderIntervalMinutes * 60 / 2;
+                }
+                ReminderDuration = value * 1000;
+            }
         }
 
         public event EventHandler SettingsChanged;
