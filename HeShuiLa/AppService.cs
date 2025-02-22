@@ -90,7 +90,16 @@ namespace HeShuiLa
             }
             if (!hints.Any())
             {
-                hints.Add("Please drink water");
+                hints.Add("请喝水~");
+                hints.Add("喝水时间到");
+                hints.Add("人体70% 都是水，不喝水会变木乃伊");
+                hints.Add("水是生命之源");
+                hints.Add("杯子里有水不喝要浇花吗");
+                hints.Add("因为热爱，所以喝水");
+                hints.Add("咋的这水咬人啊，一口都不喝");
+                hints.Add("每天8杯，健康加倍");
+                hints.Add("爱喝水的人运气不会太差");
+                hints.Add("那水端着喝吧，别客气，饮水机里还有");
                 SaveHints();
             }
         }
